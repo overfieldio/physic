@@ -9,5 +9,6 @@ Features:
 - [x] Random walking (0.01)
 - [x] Basic offspring color mutation (0.01)
 - [x] Population limit (default 10 * starting population) (0.01)
+- [ ] Bound individuals to the engine screen
 - [ ] Mutation of size of individuals
 - [ ] Mutation of reproduction factor
