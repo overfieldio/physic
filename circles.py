@@ -17,33 +17,73 @@ running = True
 console = False
 
 circle_radius = 5
-max_circles = 10
+starting_circles = 25
+max_circles = 10 * starting_circles
 
 circles = []
-
 circle_deathrate = 0.005
-circle_birthrate = 0.005
+circle_birthrate = 0.015
 
 deaths = 0
 
-for i in range(0, max_circles):
-    circles.append((random.randint(0, screen_width), random.randint(0, screen_height)))
+
+class Circle():
+    def __init__(self, x=None, y=None):
+        if x is None and y is None:
+            self.x = random.randint(0, screen_width)
+            self.y = random.randint(0, screen_height)
+        else:
+            self.x = x
+            self.y = y
+        self.screen = screen
+        self.radius = circle_radius
+        self.birthrate = circle_birthrate
+        self.deathrate = circle_deathrate
+        self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+    def draw(self):
+        pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
+
+    def move(self):
+        x = self.x
+        y = self.y
+
+        self.x = x + random.randint(-1, 1)
+        self.y = y + random.randint(-1, 1)
+
+
+def death(person):
+    if random.random() < person.deathrate:
+        return True
+    return False
+
+
+def birth(person):
+    if random.random() < person.birthrate:
+        return True
+    return False
+
+
+# creates the initial population
+for i in range(0, starting_circles):
+    circles.append(Circle())
 
 pygame.display.init()
+# game loop
 while running:
     screen.fill((0, 0, 0))
-
+    # on event handling (clicks)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            pos = pygame.mouse.get_pos()
-            if len(circles) == max_circles:
+            posx, posy = pygame.mouse.get_pos()
+            if len(circles) >= max_circles:
                 circles = circles[1:]
-                circles.append(pos)
+                circles.append(Circle(posx, posy))
             else:
-                circles.append(pos)
+                circles.append(Circle(posx, posy))
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
@@ -55,7 +95,7 @@ while running:
                 elif console:
                     console = False
 
-    #displays console information
+    # displays console information
     if console:
         textsurface = font.render('Last clicked : ' + str(pos), False, (255, 255, 255))
         screen.blit(textsurface, (0, 0))
@@ -63,32 +103,20 @@ while running:
         textsurface = font.render('Circles : ' + str(circles), False, (255, 255, 255))
         screen.blit(textsurface, (0, 50))
 
-    #cycles through each circle checking (death -> birth -> move)
-    circles_perturbed = []
-    for i in circles:
-        x = i[0]
-        y = i[1]
-        # does the circle die
-        if random.random() < circle_deathrate:
-            deaths += 1
-        else:
-            # produces offspring near the parent
-            if random.random() < circle_birthrate:
-                circles_perturbed.append((x + random.randint(-1,1), y + random.randint(-1,1)))
-            # moves the circle in a random direction
-            x += random.randint(-1,1)
-            y += random.randint(-1,1)
-            if x < 0:
-                x = 0
-            elif x > screen_width:
-                x = screen_width
-            if y < 0:
-                y = 0
-            elif y > screen_height:
-                y = screen_height
-            circles_perturbed.append((x, y))
-            pygame.draw.circle(screen, (255, 255, 255), (x, y), circle_radius)
-    circles = circles_perturbed
+    # calculates the population for the next game tick.
+    nextcirclepop = []
+    popcount = len(circles)
+    for circle in circles:
+        # moves the circles
+        circle.move()
+        # does the circle produce offspring?
+        if birth(circle) is True and popcount < max_circles:
+            nextcirclepop.append(Circle(circle.x, circle.y))
+        # does the circle die?
+        if death(circle) is False:
+            nextcirclepop.append(circle)
+            circle.draw()
+    circles = nextcirclepop
 
     textsurface = font.render('Alive: ' + str(len(circles)) + ', Dead: ' + str(deaths), False, (255, 255, 255))
     screen.blit(textsurface, (0, screen_height - 70))
@@ -100,7 +128,6 @@ while running:
     screen.blit(textsurface, (0, screen_height - 30))
 
     pygame.display.flip()
-
     clock.tick(PROGRAM_FPS)
 pygame.quit()
 
