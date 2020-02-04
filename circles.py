@@ -53,8 +53,22 @@ class Circle():
         x = self.x
         y = self.y
 
-        self.x = x + random.randint(-1, 1)
-        self.y = y + random.randint(-1, 1)
+        xn = (x + random.randint(-1, 1))
+        yn = (y + random.randint(-1, 1))
+
+        # bounds the individual to the screen
+        if xn > screen_width:
+            xn = screen_width
+        elif xn < 0:
+            xn = 0
+        if yn > screen_height:
+            yn = screen_height
+        elif yn < 0:
+            yn = 0
+
+        self.x = xn
+        self.y = yn
+
 
 
 def death(person):
@@ -112,11 +126,12 @@ while running:
 
     # displays console information
     if console:
-        textsurface = font.render('Last clicked : ' + str(pos), False, (255, 255, 255))
-        screen.blit(textsurface, (0, 0))
+        textsurface = font.render('C : clears all circles', False, (255, 255, 255))
+        screen.blit(textsurface, (0, 30))
 
-        textsurface = font.render('Circles : ' + str(circles), False, (255, 255, 255))
-        screen.blit(textsurface, (0, 50))
+        #rendering text to console screen
+        textsurface = font.render('Alive: ' + str(len(circles)) + ', Dead: ' + str(deaths), False, (255, 255, 255))
+        screen.blit(textsurface, (0, 70))
 
     # calculates the population for the next game tick.
     nextcirclepop = []
@@ -134,15 +149,8 @@ while running:
             circle.draw()
     circles = nextcirclepop
 
-    #rendering text to screen
-    textsurface = font.render('Alive: ' + str(len(circles)) + ', Dead: ' + str(deaths), False, (255, 255, 255))
-    screen.blit(textsurface, (0, screen_height - 70))
-
     textsurface = font.render('` : console', False, (255, 255, 255))
-    screen.blit(textsurface, (0, screen_height - 50))
-
-    textsurface = font.render('C : clears all circles', False, (255, 255, 255))
-    screen.blit(textsurface, (0, screen_height - 30))
+    screen.blit(textsurface, (0, 0))
 
     pygame.display.flip()
     clock.tick(PROGRAM_FPS)
