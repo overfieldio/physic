@@ -8,3 +8,4 @@ Features:
 * Births / Deaths (0.01)
 * Random walking (0.01)
 * Basic offspring color mutation (0.01)
+* Population limit (default 10 * starting population) (0.01)
