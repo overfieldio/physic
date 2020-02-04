@@ -1,4 +1,4 @@
-## physic 0.011
+## physic 0.011 04.02.20
 
 Container for python programs related to a basic simulation engine using pygame.
 
