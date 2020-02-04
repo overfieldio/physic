@@ -28,18 +28,23 @@ deaths = 0
 
 
 class Circle():
-    def __init__(self, x=None, y=None):
+    def __init__(self, x=None, y=None, color=None):
         if x is None and y is None:
             self.x = random.randint(0, screen_width)
             self.y = random.randint(0, screen_height)
         else:
             self.x = x
             self.y = y
+
+        if color is None:
+            self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        else:
+            self.color = color
+
         self.screen = screen
         self.radius = circle_radius
         self.birthrate = circle_birthrate
         self.deathrate = circle_deathrate
-        self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def draw(self):
         pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
@@ -62,6 +67,16 @@ def birth(person):
     if random.random() < person.birthrate:
         return True
     return False
+
+
+def mutatecolor(color):
+    r, g, b = color
+    r = (r + random.randint(-10, 10)) % 256
+    g = (g + random.randint(-10, 10)) % 256
+    b = (b + random.randint(-10, 10)) % 256
+
+    colormutated = (r, g, b)
+    return colormutated
 
 
 # creates the initial population
@@ -111,13 +126,15 @@ while running:
         circle.move()
         # does the circle produce offspring?
         if birth(circle) is True and popcount < max_circles:
-            nextcirclepop.append(Circle(circle.x, circle.y))
+            # creates offspring and slightly mutates the color
+            nextcirclepop.append(Circle(x=circle.x, y=circle.y, color=mutatecolor(circle.color)))
         # does the circle die?
         if death(circle) is False:
             nextcirclepop.append(circle)
             circle.draw()
     circles = nextcirclepop
 
+    #rendering text to screen
     textsurface = font.render('Alive: ' + str(len(circles)) + ', Dead: ' + str(deaths), False, (255, 255, 255))
     screen.blit(textsurface, (0, screen_height - 70))
 
